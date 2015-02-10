@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document><Folder><name>1</name>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">1</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.60052,-54.77158</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">2</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.59994,-54.7711</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">3</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.5989,-54.77062</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">4</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.60034,-54.77009</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">5</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.60071,-54.76915</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">6</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.60122,-54.76863</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">7</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.60051,-54.76769</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">8</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.59996,-54.76694</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">9</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.60051,-54.76646</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#1">
+		<SimpleData name="Station">10</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-69.60091,-54.76649</coordinates></Point>
+  </Placemark>
+</Folder>
+<Schema name="1" id="1">
+	<SimpleField name="Station" type="float"></SimpleField>
+</Schema>
+</Document></kml>

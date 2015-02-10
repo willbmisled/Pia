@@ -1,0 +1,16 @@
+"SiteCode","Observer","Area","Site","Date","N","StartTime","EndTime"
+"PTM","JJ","Pia","TerminalMoraine",20150121,10,10.15,12
+"PUL","JJ","Pia","UplandLake",20150122,12,8.45,11.27
+"PCF","JJ","Pia","CoastalForest",20150123,18,7.3,13.23
+"ARF","JJ","Aleman","RiverForest",20150124,9,15.37,16.48
+"AIF","JJ","Aleman","InteriorForest",20150124,9,17.06,18.14
+"PTT","JJ","Pia","TouristTrail",20150125,10,9,10.4
+"ACC","JJ","Aleman","CostaCanal",20150127,10,10.05,12.22
+"HCO","JJ","Holanda","CaletaOlla",20150127,10,15.49,19.43
+"ESE","JJ","Espanol","SenoEspana",20150128,10,17.3,18.13
+"PBO","JJ","Pia","CostaBrazoOeste",20150129,10,10.48,13.16
+"ICL","JJ","IslaHoste","CaletaLetier",20150131,10,14.24,15.48
+"PPN","OB","Pia","EsteEstePlayaHaciaN",20150121,10,19.1,20.53
+"PPS","OB","Pia","EsteEstePlayaHaciaS",20150122,10,11.28,12.43
+"AB","OB","Aleman","Bosque",20150125,11,11.42,13.33
+"HC","OB","Holanda","Costa",20150128,10,11.12,12.33
