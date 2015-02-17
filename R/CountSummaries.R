@@ -4,23 +4,36 @@
 
 
 #read data
-  setwd("~/PortableApps/R/scripts/Pia")
+  setwd("~/PortableApps/R/scripts/Pia/Data")
   library(RODBC)
   con<-odbcConnectExcel("DatosAvesPia.xls") # open a connection to the Excel file
   sqlTables(con)$TABLE_NAME # get list of all sheets
-  Pia<-sqlFetch(con, 'Counts',stringsAsFactors=FALSE) # read a sheet
-  birdNames<-sqlFetch(con, 'BirdNames',stringsAsFactors=FALSE) # read a sheet
+  Counts<-sqlFetch(con, 'Counts$',stringsAsFactors=FALSE) # read a sheet
+  Obs<-sqlFetch(con, 'Observations',stringsAsFactors=FALSE) # read a sheet
+  Sites<-sqlFetch(con, 'Sites',stringsAsFactors=FALSE) # read a sheet
   plantNames<-sqlFetch(con, 'PlantNames',stringsAsFactors=FALSE) # read a sheet
   close(con)
 #select plant and bird columns
-  names(Pia)
+  names(Counts)
   BC<-15:32
   PC<-33:49
+  
+#add site information to counts  
+  #Check that all birdnames for counts are in observations
+    table(unique(birdNames$Abbr)%in%unique(Obs$Abbr))
+    a<-merge(birdNames,Obs,by='Abbr',all=F)
+    a[,c(1,4,7,8)]
+  
+#add site information to Counts
+  #Check that all SiteCodes in Obs and Counts match "Sites"
+  names(Counts)
+  table(unique(Counts$SiteCode)%in%unique(Sites$SiteCode))
+  
   
 #aggregate plant and bird data by site
   #function to aggregate relative abundance (birds) or percent present (Plants) by site
   Sitio<-function(Sp,Aggregator){
-    x<-Pia[,Sp]
+    x<-Counts[,Sp]
     #StdErr function
     se<-function(x) sd(x)/sqrt(length(x))
     #get N
@@ -40,18 +53,18 @@
   }
   
 Sp<-a[i]
-  Aggregator<-Pia$Area
+  Aggregator<-Counts$Area
  i<-1
-  Sitio(a[i],Pia$Area)
+  Sitio(a[i],Counts$Area)
   
 
 #birds
   #Loop to aggregate all birds by Area
-    a<-names(Pia)[BC]
+    a<-names(Counts)[BC]
   #start loop
   areaBirds<-c()
   for(i in c(1:length(a)) ){
-    x<-Sitio(a[i],Pia$Area)
+    x<-Sitio(a[i],Counts$Area)
     areaBirds<-rbind(areaBirds,x)
   }
   names(areaBirds)[1]<-'Area'
@@ -60,11 +73,11 @@ Sp<-a[i]
 
   #Loop to aggregate all birds by Site
     #choose species to include: OJO make sure this is correct
-      a<-names(Pia)[BC]
+      a<-names(Counts)[BC]
     #start loop
       AllSp<-c()
       for(i in c(1:length(a)) ){
-        x<-Sitio(a[i],Pia$SiteCode)
+        x<-Sitio(a[i],Counts$SiteCode)
         AllSp<-rbind(AllSp,x)
       }
   
@@ -122,11 +135,11 @@ Sp<-a[i]
   #plant data
   #Loop to aggregate all plants by SiteCode
   #choose species to include: OJO make sure this is correct
-  a<-names(Pia)[PC]
+  a<-names(Counts)[PC]
   #start loop
   AllSp<-c()
   for(i in c(1:length(a)) ){
-    x<-Sitio(a[i],Pia$SiteCode)
+    x<-Sitio(a[i],Counts$SiteCode)
     AllSp<-rbind(AllSp,x)
   }
   
@@ -181,7 +194,7 @@ Sp<-a[i]
   
 
   
-  rawBirds<-Pia
+  rawBirds<-Counts
   ##Save the data    
   save(rawBirds,siteBirds,sitePlants,areaBirds,birdNames,plantNames,file='CountSummaries.rda') 
   

@@ -1,0 +1,23 @@
+---
+title: "Notes"
+author: "Bryan Milstead"
+date: "Monday, February 16, 2015"
+output: html_document
+---
+
+To Do
+-------------------------
+* Complete Bird List
+* Complete Plant List
+
+
+
+
+
+
+
+Work Notes
+-------------------------
+20150216
+* Seno Pia split into Seno Pia Oeste and Seno Pia Este.  PBO is the only site in the west branch, the rest are in in Seno Pia Este.
+

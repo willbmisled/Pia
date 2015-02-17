@@ -1,0 +1,122 @@
+---
+title: "PiaData"
+author: "Bryan Milstead"
+date: "Tuesday, February 17, 2015"
+output: html_document
+---
+<!---
+use these command instead of the knit icon if you want the data and work loaded into the R workspace
+  library(knitr)
+  setwd("~/PortableApps/R/scripts/Pia/Data")
+  knit('PiaData.rmd')
+-->
+To Do
+-------------------------
+* Complete Bird List
+* Complete Plant List
+
+Work Notes
+-------------------------
+20150216
+* Seno Pia split into Seno Pia Oeste and Seno Pia Este.  PBO is the only site in the west branch, the rest are in in Seno Pia Este.
+
+Introduction
+-------------------------
+* Bird Counts were conducted at sites on the Beagle Channel from Jan.21-31 2015.
+* Mist netting was conducted at 3 sites during this period.
+
+Data Processing
+-------------------------
+* read data from "DatosAvesPia.xls"
+  - Counts: the raw count data
+  - Obs: Observations on relative abundance by SiteCode, this table also contains the bird taxonmy and codes to be used throughout. Relative Abundance: 0=absent; 1=1-5 individuals; 2=6-20 individuals; 3=>20 individuals.
+  - Sites: details on locations-this is joines to sites
+  - PlantNames: plant taxonomy used
+
+```{r getData, include=FALSE, echo=FALSE, cache=FALSE} 
+  setwd("~/PortableApps/R/scripts/Pia/Data")
+  library(RODBC)
+  con<-odbcConnectExcel("DatosAvesPia.xls") # open a connection to the Excel file
+  sqlTables(con)$TABLE_NAME # get list of all sheets
+  Counts<-sqlFetch(con, 'Counts$',stringsAsFactors=FALSE) # read a sheet
+  Obs<-sqlFetch(con, 'Observations',stringsAsFactors=FALSE) # read a sheet
+  Sites<-sqlFetch(con, 'Sites',stringsAsFactors=FALSE) # read a sheet
+  plantNames<-sqlFetch(con, 'PlantNames',stringsAsFactors=FALSE) # read a sheet
+  close(con)
+#select plant and bird columns
+  names(Counts)
+  BC<-11:28
+  PC<-29:45
+```
+  
+* add the Site information to Sites
+
+```{r Sites, include=FALSE, echo=FALSE, cache=FALSE} 
+  #add site information to Counts
+    #Check that all SiteCodes in Obs and Counts match "Sites"
+      table(unique(Counts$SiteCode)%in%unique(Sites$SiteCode))
+    #add Sites to Counts
+      Counts<-merge(Counts,Sites[,-5],by='SiteCode',all.x=T)
+```
+
+* Aggregate Bird and Plant Counts by Area
+
+```{r Aggregate, include=FALSE, echo=FALSE, cache=FALSE}   
+  #function to aggregate relative abundance (birds) or percent present (Plants) by site or area
+    Sitio<-function(Sp,Aggregator){
+      x<-Counts[,Sp]
+      #StdErr function
+      se<-function(x) sd(x)/sqrt(length(x))
+      #get N
+      Out<-aggregate(x,by=list(Aggregator),length)
+      names(Out)<-c('SiteCode','N')
+      #get mean
+      Mean<-aggregate(x,by=list(Aggregator),mean)
+      names(Mean)<-c('SiteCode','Mean')
+      Out$Mean<-Mean$Mean
+      #get SE
+      SE<-aggregate(x,by=list(Aggregator),se)
+      names(SE)<-c('SiteCode','StdErr')
+      Out$StdErr<-SE$StdErr
+      #Add Species
+      Out$Sp<-Sp
+      #round mean & StdErr
+        Out$Mean<-round(Out$Mean,2)
+        Out$StdErr<-round(Out$StdErr,2)
+      return(Out)
+    }
+    
+
+#birds
+  #Loop to aggregate all birds by Area
+    a<-names(Counts)[BC]
+  #start loop
+    areaBirds<-c()
+    for(i in c(1:length(a)) ){
+      x<-Sitio(a[i],Counts$Area)
+      areaBirds<-rbind(areaBirds,x)
+    }
+    names(areaBirds)[c(1,5)]<-c('Area','Abbr')
+  #add taxonomy
+    areaBirds<-merge(areaBirds,Obs[,1:5],by='Abbr',all.x=T)
+
+#plant data
+  #Loop to aggregate all plants by area
+    a<-names(Counts)[PC]
+  #start loop
+    areaPlants<-c()
+    for(i in c(1:length(a)) ){
+      x<-Sitio(a[i],Counts$Area)
+      areaPlants<-rbind(areaPlants,x)
+    }
+  #change Missing values to Zeros
+    areaPlants[is.na(areaPlants)]<-0
+```  
+
+* Save the data to PiaData.rda
+
+```{r Aggregate, include=FALSE, echo=FALSE, cache=FALSE}  
+  save(Counts,Obs,areaBirds,areaPlants,file='PiaData.rda') 
+  
+
+

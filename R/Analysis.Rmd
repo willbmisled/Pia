@@ -1,0 +1,141 @@
+---
+title: "Analysis"
+author: "Bryan Milstead"
+date: "Tuesday, February 17, 2015"
+output: html_document
+---
+<!---
+use these command instead of the knit icon if you want the data and work loaded into the R workspace
+  library(knitr)
+  setwd("~/PortableApps/R/scripts/Pia/")
+  knit('R/Analysis.rmd')
+-->
+To Do
+-------------------------
+* 
+
+Work Notes
+-------------------------
+201502??
+* 
+
+Introduction
+-------------------------
+* Bird Counts were conducted at sites on the Beagle Channel from Jan.21-31 2015.
+* Mist netting was conducted at 3 sites during this period.
+
+Analysis
+----------------
+* Load data
+
+```{r setup, include=FALSE, echo=FALSE, cache=FALSE} 
+  load('Data/PiaData.rda') 
+```
+
+* Plot Bird counts by area
+
+```{r setup, include=FALSE, echo=FALSE, cache=FALSE} 
+  #plotOrder for each species determined by means
+    a<-aggregate(areaBirds$Mean,by=list(areaBirds$Abbr),mean)
+    a<-a[order(a$x,decreasing=TRUE),]
+    a$plotOrder<-1:nrow(a)
+    a<-a[,-2]
+    names(a)<-c('Abbr','plotOrder')
+
+  #add plotOrder to Birds and sort
+    areaBirds<-merge(areaBirds,a,by='Abbr',all.x=TRUE)
+    areaBirds<-areaBirds[order(c(areaBirds$plotOrder)),]
+  
+
+  #plot birds by area
+    #function to make plots
+      plotArea<-function(Area='Seno Alemania',Xlab=FALSE){
+        Sp<-areaBirds[areaBirds$Area==Area,]
+        if(Xlab==TRUE) {
+          #xlabels<-substr(unique(Sp$Abbr),1,4)
+          xlabels<-unique(Sp$Abbr)
+        }else{
+          xlabels<-NULL}
+        Legend<-paste(unique(Sp$Area),' (N=',unique(Sp$N),")",sep='')
+        x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr+.1)),names.arg=xlabels,axes=FALSE,cex.names=1.75,las=2)
+        arrows(x,Sp$Mean-Sp$StdErr,x,Sp$Mean+Sp$StdErr,code=3,angle=90,length=.1)
+        box()
+        text(15,2,Legend,cex=2,adj=0)
+        axis(2,at=1:2,labels=TRUE,las=1.5,cex.axis=2)
+      }
+
+###########setup for a multipanel graph
+  Mai<-c(0,1,0.0000,0.1)  #default=c(1.36,1.093,1.093,0.56)
+  Omi<-c(1.2,0.0,0.25,0.5)     #default=c(0,0,0,0)
+  win.graph(11, 8.5) 
+  par(mfrow=c(6,1),mai=Mai,omi=Omi)
+  plotArea("Seno Alemania",FALSE)
+  plotArea("Seno Torcido",FALSE)
+  plotArea("Seno Holanda",FALSE)
+  plotArea("Isla Hoste",FALSE)
+    mtext("          Mean Abundance / Station (+/- StdErr)",2,4,cex=1.75)
+  plotArea("Seno Pia Oeste",FALSE)
+  plotArea("Seno Pia Este",TRUE)
+    #mtext("Species",1,4,cex=2)
+  
+      
+
+  
+  
+  barplot(Sp$Mean,names.arg=unique(Sp$Abbr),axes=FALSE,cex.names=.7,las=1.5)
+  axis(2,at=1:2,labels=TRUE,las=1.5,cex.axis=2)
+  
+  ###########old
+  
+  
+#plot birds by area
+  a<-unique(Birds$Area)
+  i<-1
+  Sp<-Birds[Birds$Area==a[i],]
+  xlabels=Sp$Abbr
+  x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr+.1)),names.arg=xlabels,axes=FALSE)
+  arrows(x,Sp$Mean-Sp$StdErr,x,Sp$Mean+Sp$StdErr,code=3,angle=90,length=.1)
+  box()
+  text(.25,2.4,unique(Sp$Area),cex=2,adj=0)
+  axis(2,at=1:2,labels=TRUE,las=1.5)
+  
+  
+  
+  
+  
+
+#Plot Sp by Area
+  
+plotAggr<-function(Aggr=Birds$Abbr,i=11){
+  a<-unique(Aggr)
+  Sp<-Birds[Birds$Abbr==a[i],]
+  xlabels=Sp$Area
+  x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr+.1)),names.arg=xlabels,axes=FALSE)
+  arrows(x,Sp$Mean-Sp$StdErr,x,Sp$Mean+Sp$StdErr,code=3,angle=90,length=.1)
+  box()
+  text(.25,2.4,unique(Sp$EnglishName),cex=2,adj=0)
+  axis(2,at=1:2,labels=TRUE,las=1.5)
+}
+  
+  #windows(10,7.5)
+  plotAggr(Aggr=Birds$Abbr,15)
+  
+  
+  Aggr=Birds$Area
+  i=1
+    a<-unique(Aggr)
+    Sp<-Birds[Birds$Abbr==a[i],]
+    xlabels=Sp$Abbr
+    x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr+.1)),names.arg=xlabels,axes=FALSE)
+    arrows(x,Sp$Mean-Sp$StdErr,x,Sp$Mean+Sp$StdErr,code=3,angle=90,length=.1)
+    box()
+    text(.25,2.4,unique(Sp$EnglishName),cex=2,adj=0)
+    axis(2,at=1:2,labels=TRUE,las=1.5)
+  }
+  
+  
+  
+  x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr)),names.arg=Sp$Area, ylab="Relative Abundance (+/- 1 stdErr)",xlab='Site')
+  
+  text(.75,2.4,'xxxxxxxxxxxxxxx',cex=2,adj=0)
+

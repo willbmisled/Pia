@@ -1,3 +1,5 @@
+#This has been replaced with CountSummaries.R
+
 
 #read data
   setwd("data")
