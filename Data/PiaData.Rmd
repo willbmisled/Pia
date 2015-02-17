@@ -20,6 +20,9 @@ Work Notes
 20150216
 * Seno Pia split into Seno Pia Oeste and Seno Pia Este.  PBO is the only site in the west branch, the rest are in in Seno Pia Este.
 
+20150217
+* Harmonized lists between the mist nets and the counts.  Species captured in mistnet that weren't counted were added as zero values and vice versa for the mist net data.  This allows them to be plotted in the same order.
+
 Introduction
 -------------------------
 * Bird Counts were conducted at sites on the Beagle Channel from Jan.21-31 2015.
@@ -42,11 +45,12 @@ Data Processing
   Obs<-sqlFetch(con, 'Observations',stringsAsFactors=FALSE) # read a sheet
   Sites<-sqlFetch(con, 'Sites',stringsAsFactors=FALSE) # read a sheet
   plantNames<-sqlFetch(con, 'PlantNames',stringsAsFactors=FALSE) # read a sheet
+  mist<-sqlFetch(con, 'MistNets',stringsAsFactors=FALSE) # read a sheet
   close(con)
 #select plant and bird columns
   names(Counts)
-  BC<-11:28
-  PC<-29:45
+  BC<-11:31
+  PC<-32:48
 ```
   
 * add the Site information to Sites
@@ -98,7 +102,7 @@ Data Processing
     }
     names(areaBirds)[c(1,5)]<-c('Area','Abbr')
   #add taxonomy
-    areaBirds<-merge(areaBirds,Obs[,1:5],by='Abbr',all.x=T)
+    areaBirds<-merge(areaBirds,Obs[,3:7],by='Abbr',all.x=T)
 
 #plant data
   #Loop to aggregate all plants by area
@@ -113,10 +117,16 @@ Data Processing
     areaPlants[is.na(areaPlants)]<-0
 ```  
 
+* standardize the mistnet data
+
+```{r Mist, include=FALSE, echo=FALSE, cache=FALSE}  
+  mist$IndividualsAdj<-round(10000*mist$Individuals/(mist$EffortHours*mist$NetAreaM2),2)
+```
+
 * Save the data to PiaData.rda
 
-```{r Aggregate, include=FALSE, echo=FALSE, cache=FALSE}  
-  save(Counts,Obs,areaBirds,areaPlants,file='PiaData.rda') 
-  
+```{r Save, include=FALSE, echo=FALSE, cache=FALSE}  
+  save(Counts,Obs,mist,areaBirds,areaPlants,file='PiaData.rda') 
+```  
 
 

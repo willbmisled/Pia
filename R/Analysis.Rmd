@@ -30,112 +30,76 @@ Analysis
 
 ```{r setup, include=FALSE, echo=FALSE, cache=FALSE} 
   load('Data/PiaData.rda') 
+  library(ggplot2)
+```
+
+* Determine plot order for species for areaBirds and mist based on the mean number of counts per area (most abundant to least abundant)
+* Note: mist net data and count data harmonized to have the same number of species even if not observed
+* Determine plot order for Area-west to east
+
+```{r plotOrder, include=FALSE, echo=FALSE, cache=FALSE} 
+  #plotOrder for each species determined by means
+    a<-aggregate(areaBirds$Mean,by=list(areaBirds$Abbr),mean)
+    a<-a[order(a$x,decreasing=TRUE),]
+    names(a)[1]<-c('Abbr')
+    a$plotOrder<-1:nrow(a)
+    a<-a[,-2]
+    a$Abbr<-factor(a$plotOrder,labels=a$Abbr,ordered=TRUE)  #convert Abbr to a factor ordered by plotOrder
+  
+  #add plotOrder to areaBirds and mist and sort
+    areaBirds<-merge(a,areaBirds,by='Abbr',all.y=TRUE)
+    areaBirds<-areaBirds[order(areaBirds$plotOrder),]
+
+    mist<-merge(a,mist,by='Abbr',all.y=TRUE)
+    mist<-mist[order(mist$plotOrder),]
+  
+  #plotOrder for each area determined by order west to east
+    a<-aggregate(Counts$Easting,by=list(Counts$Area),mean)
+    a<-a[order(a$x),]
+    areaBirds$Area<-factor(areaBirds$Area)
+      levels(areaBirds$Area)<-levels(areaBirds$Area)[c(6,5,4,2,3,1)]
+    
+    mist$Area<-factor(mist$Area)
+      levels(mist$Area)<-levels(mist$Area)[c(3,1,2)]
 ```
 
 * Plot Bird counts by area
 
-```{r setup, include=FALSE, echo=FALSE, cache=FALSE} 
-  #plotOrder for each species determined by means
-    a<-aggregate(areaBirds$Mean,by=list(areaBirds$Abbr),mean)
-    a<-a[order(a$x,decreasing=TRUE),]
-    a$plotOrder<-1:nrow(a)
-    a<-a[,-2]
-    names(a)<-c('Abbr','plotOrder')
+```{r plotArea, include=FALSE, echo=FALSE, cache=FALSE} 
 
-  #add plotOrder to Birds and sort
-    areaBirds<-merge(areaBirds,a,by='Abbr',all.x=TRUE)
-    areaBirds<-areaBirds[order(c(areaBirds$plotOrder)),]
-  
-
-  #plot birds by area
-    #function to make plots
-      plotArea<-function(Area='Seno Alemania',Xlab=FALSE){
-        Sp<-areaBirds[areaBirds$Area==Area,]
-        if(Xlab==TRUE) {
-          #xlabels<-substr(unique(Sp$Abbr),1,4)
-          xlabels<-unique(Sp$Abbr)
-        }else{
-          xlabels<-NULL}
-        Legend<-paste(unique(Sp$Area),' (N=',unique(Sp$N),")",sep='')
-        x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr+.1)),names.arg=xlabels,axes=FALSE,cex.names=1.75,las=2)
-        arrows(x,Sp$Mean-Sp$StdErr,x,Sp$Mean+Sp$StdErr,code=3,angle=90,length=.1)
-        box()
-        text(15,2,Legend,cex=2,adj=0)
-        axis(2,at=1:2,labels=TRUE,las=1.5,cex.axis=2)
-      }
-
-###########setup for a multipanel graph
-  Mai<-c(0,1,0.0000,0.1)  #default=c(1.36,1.093,1.093,0.56)
-  Omi<-c(1.2,0.0,0.25,0.5)     #default=c(0,0,0,0)
+#plot areaBirds
   win.graph(11, 8.5) 
-  par(mfrow=c(6,1),mai=Mai,omi=Omi)
-  plotArea("Seno Alemania",FALSE)
-  plotArea("Seno Torcido",FALSE)
-  plotArea("Seno Holanda",FALSE)
-  plotArea("Isla Hoste",FALSE)
-    mtext("          Mean Abundance / Station (+/- StdErr)",2,4,cex=1.75)
-  plotArea("Seno Pia Oeste",FALSE)
-  plotArea("Seno Pia Este",TRUE)
-    #mtext("Species",1,4,cex=2)
-  
-      
+  ggplot(areaBirds, aes(x=Abbr, y=Mean)) + 
+    geom_bar(position=position_dodge(), stat="identity") +
+    geom_errorbar(aes(ymin=Mean-StdErr, ymax=Mean+StdErr),
+                  width=.2,                    # Width of the error bars
+                position=position_dodge(.9))+
+                facet_grid(Area~.) +
+                xlab("Bird Species") + 
+                ylab(paste('Mean Counts / Station (',expression("\261"),' 1 se)',sep='')) +
+                scale_y_continuous(breaks=seq(0, 2, 1)) +
+                theme(axis.title.x=element_text(face="bold",size=20,vjust=-.5),
+                  axis.text.x=element_text(angle=45, vjust=1.1,hjust=1.1,size=16)) +
+                theme(axis.title.y=element_text(face="bold",size=20,vjust=1),
+                  axis.text.y=element_text(angle=0, vjust=0.5, size=16))
+ ```
 
-  
-  
-  barplot(Sp$Mean,names.arg=unique(Sp$Abbr),axes=FALSE,cex.names=.7,las=1.5)
-  axis(2,at=1:2,labels=TRUE,las=1.5,cex.axis=2)
-  
-  ###########old
-  
-  
-#plot birds by area
-  a<-unique(Birds$Area)
-  i<-1
-  Sp<-Birds[Birds$Area==a[i],]
-  xlabels=Sp$Abbr
-  x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr+.1)),names.arg=xlabels,axes=FALSE)
-  arrows(x,Sp$Mean-Sp$StdErr,x,Sp$Mean+Sp$StdErr,code=3,angle=90,length=.1)
-  box()
-  text(.25,2.4,unique(Sp$Area),cex=2,adj=0)
-  axis(2,at=1:2,labels=TRUE,las=1.5)
-  
-  
-  
-  
-  
+* Plot Mist Net Captures by area
 
-#Plot Sp by Area
-  
-plotAggr<-function(Aggr=Birds$Abbr,i=11){
-  a<-unique(Aggr)
-  Sp<-Birds[Birds$Abbr==a[i],]
-  xlabels=Sp$Area
-  x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr+.1)),names.arg=xlabels,axes=FALSE)
-  arrows(x,Sp$Mean-Sp$StdErr,x,Sp$Mean+Sp$StdErr,code=3,angle=90,length=.1)
-  box()
-  text(.25,2.4,unique(Sp$EnglishName),cex=2,adj=0)
-  axis(2,at=1:2,labels=TRUE,las=1.5)
-}
-  
-  #windows(10,7.5)
-  plotAggr(Aggr=Birds$Abbr,15)
-  
-  
-  Aggr=Birds$Area
-  i=1
-    a<-unique(Aggr)
-    Sp<-Birds[Birds$Abbr==a[i],]
-    xlabels=Sp$Abbr
-    x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr+.1)),names.arg=xlabels,axes=FALSE)
-    arrows(x,Sp$Mean-Sp$StdErr,x,Sp$Mean+Sp$StdErr,code=3,angle=90,length=.1)
-    box()
-    text(.25,2.4,unique(Sp$EnglishName),cex=2,adj=0)
-    axis(2,at=1:2,labels=TRUE,las=1.5)
-  }
-  
-  
-  
-  x<-barplot(Sp$Mean,ylim=c(0,max(areaBirds$Mean+areaBirds$StdEr)),names.arg=Sp$Area, ylab="Relative Abundance (+/- 1 stdErr)",xlab='Site')
-  
-  text(.75,2.4,'xxxxxxxxxxxxxxx',cex=2,adj=0)
+```{r plotMist, include=FALSE, echo=FALSE, cache=FALSE} 
+
+#plot mist
+  win.graph(11, 8.5) 
+  ggplot(mist, aes(x=Abbr, y=IndividualsAdj)) + 
+    geom_bar(position=position_dodge(), stat="identity") +
+                facet_grid(Area~.) +
+                xlab("Bird Species") + 
+                ylab('Mist Net Captures Adjusted for Effort') +
+                #scale_y_continuous(breaks=seq(0, 2, 1)) +
+                theme(axis.title.x=element_text(face="bold",size=20,vjust=-.5),
+                  axis.text.x=element_text(angle=45, vjust=1.1,hjust=1.1,size=16)) +
+                theme(axis.title.y=element_text(face="bold",size=20,vjust=1),
+                  axis.text.y=element_text(angle=0, vjust=0.5, size=16))
+ ```
+
 
