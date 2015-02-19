@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document><Folder><name>Seno Pia Brazo Oeste</name>
+	<Placemark>
+	<Style id="One">
+      <IconStyle>
+         <color>FF9999FF</color>
+         <scale>3</scale>
+         <Icon>
+            <href>http://maps.google.com/mapfiles/kml/pushpin/pink-pushpin.png</href>
+         </Icon>
+      </IconStyle>
+   </Style>
+	<name>Station1</name>
+    <description>A Station.</description>
+	<styleUrl>#One</styleUrl>
+      <Point><coordinates>-69.69848,-54.79546</coordinates></Point>
+  </Placemark>
+  <Placemark>
+  <Style id="2">
+      <IconStyle>
+         <color>FF00FFFF</color>
+         <scale>2</scale>
+         <Icon>
+            <href>http://maps.google.com/mapfiles/kml/pushpin/pink-pushpin.png</href>
+         </Icon>
+      </IconStyle>
+   </Style>
+	<name>Station2</name>
+    <description>Another Station.</description>
+	<styleUrl>#2</styleUrl>
+      <Point><coordinates>-69.69855,-54.79467</coordinates></Point>
+  </Placemark>
+</Folder>
+<Schema name="1" id="1">
+	<SimpleField name="Station" type="float"></SimpleField>
+</Schema>
+</Document></kml>

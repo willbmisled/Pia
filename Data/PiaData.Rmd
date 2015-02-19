@@ -53,7 +53,7 @@ Data Processing
   PC<-32:48
 ```
   
-* add the Site information to Sites
+* add the Site information to Counts
 
 ```{r Sites, include=FALSE, echo=FALSE, cache=FALSE} 
   #add site information to Counts
@@ -70,12 +70,14 @@ Data Processing
     Sitio<-function(Sp,Aggregator){
       x<-Counts[,Sp]
       #StdErr function
-      se<-function(x) sd(x)/sqrt(length(x))
+        se<-function(x) sd(na.exclude(x))/sqrt(length(na.exclude(x)))
+      #Length na.rm function
+        len<-function(x) length(na.exclude(x))
       #get N
-      Out<-aggregate(x,by=list(Aggregator),length)
+      Out<-aggregate(x,by=list(Aggregator),len)
       names(Out)<-c('SiteCode','N')
       #get mean
-      Mean<-aggregate(x,by=list(Aggregator),mean)
+      Mean<-aggregate(x,by=list(Aggregator),mean,na.rm=TRUE)
       names(Mean)<-c('SiteCode','Mean')
       Out$Mean<-Mean$Mean
       #get SE
@@ -113,8 +115,9 @@ Data Processing
       x<-Sitio(a[i],Counts$Area)
       areaPlants<-rbind(areaPlants,x)
     }
-  #change Missing values to Zeros
-    areaPlants[is.na(areaPlants)]<-0
+    names(areaPlants)[1]<-'Area'
+  #add taxonomy
+    areaPlants<-merge(areaPlants,plantNames,by.x='Sp',by.y='ColumnName',all.x=TRUE)
 ```  
 
 * standardize the mistnet data

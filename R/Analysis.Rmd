@@ -29,6 +29,7 @@ Analysis
 * Load data
 
 ```{r setup, include=FALSE, echo=FALSE, cache=FALSE} 
+  setwd("~/PortableApps/R/scripts/Pia/")
   load('Data/PiaData.rda') 
   library(ggplot2)
 ```
@@ -37,35 +38,58 @@ Analysis
 * Note: mist net data and count data harmonized to have the same number of species even if not observed
 * Determine plot order for Area-west to east
 
-```{r plotOrder, include=FALSE, echo=FALSE, cache=FALSE} 
-  #plotOrder for each species determined by means
-    a<-aggregate(areaBirds$Mean,by=list(areaBirds$Abbr),mean)
-    a<-a[order(a$x,decreasing=TRUE),]
-    names(a)[1]<-c('Abbr')
-    a$plotOrder<-1:nrow(a)
-    a<-a[,-2]
-    a$Abbr<-factor(a$plotOrder,labels=a$Abbr,ordered=TRUE)  #convert Abbr to a factor ordered by plotOrder
-  
-  #add plotOrder to areaBirds and mist and sort
-    areaBirds<-merge(a,areaBirds,by='Abbr',all.y=TRUE)
-    areaBirds<-areaBirds[order(areaBirds$plotOrder),]
+```{r Obs, include=FALSE, echo=FALSE, cache=FALSE} 
+  #convert Obs to long format
+    library(reshape2)
+    Obs<-melt(Obs,id=3:7,measure=8:22,variable.name='SiteCode',value.name='RelAbund')
+  #add site info to obs
+    Obs<-merge(Sites[,c('SiteCode','Area','Site')],Obs,by='SiteCode',all.y=T)
 
-    mist<-merge(a,mist,by='Abbr',all.y=TRUE)
-    mist<-mist[order(mist$plotOrder),]
-  
+  #aggregate Obs by area
+    areaObs<-aggregate(Obs$RelAbund,by=list(Obs$Area,Obs$Abbr,Obs$SpanishName),max) #note this deletes rows with "Abbr"==NA
+      names(areaObs)<-c('Area','Abbr','NombreComún','maxRelAbund')
+```
+
+```{r SpOrder, include=FALSE, echo=FALSE, cache=FALSE} 
+  #plotOrder for each species determined by means
+    #birds
+      a<-aggregate(areaBirds$Mean,by=list(areaBirds$Abbr),mean)
+      a<-a[order(a$x,decreasing=TRUE),]
+      names(a)[1]<-c('Abbr')
+      a$plotOrder<-1:nrow(a)
+      Birds<-a[,1]
+        #add plotOrder to data-by ordered factors
+          areaBirds$Abbr<-ordered(areaBirds$Abbr,levels=Birds)
+          mist$Abbr<-ordered(mist$Abbr,levels=Birds)
+          areaObs$Abbr<-ordered(areaObs$Abbr,levels=Birds)
+            
+    #plants
+      b<-aggregate(areaPlants$Mean,by=list(areaPlants$Abbr),mean)
+      b<-b[order(b$x,decreasing=TRUE),]
+      names(b)[1]<-c('Abbr')
+      Plants<-b[,1]
+        #add plotOrder to data-by ordered factors
+          areaPlants$Abbr<-ordered(areaPlants$Abbr,levels=Plants)
+
+```
+
+```{r AreaOrder, include=FALSE, echo=FALSE, cache=FALSE} 
   #plotOrder for each area determined by order west to east
     a<-aggregate(Counts$Easting,by=list(Counts$Area),mean)
     a<-a[order(a$x),]
-    areaBirds$Area<-factor(areaBirds$Area)
-      levels(areaBirds$Area)<-levels(areaBirds$Area)[c(6,5,4,2,3,1)]
-    
-    mist$Area<-factor(mist$Area)
-      levels(mist$Area)<-levels(mist$Area)[c(3,1,2)]
+      names(a)[1]<-'Area'
+    Area<-a[,1]
+        #add plotOrder to data-by ordered factors
+          areaBirds$Area<-ordered(areaBirds$Area,levels=Area)
+          mist$Area<-ordered(mist$Area,levels=Area)
+          areaObs$Area<-ordered(areaObs$Area,levels=Area)
+          areaPlants$Area<-ordered(areaPlants$Area,levels=Area)
+
 ```
 
 * Plot Bird counts by area
 
-```{r plotArea, include=FALSE, echo=FALSE, cache=FALSE} 
+```{r plotCounts, include=FALSE, echo=FALSE, cache=FALSE} 
 
 #plot areaBirds
   win.graph(11, 8.5) 
@@ -82,7 +106,7 @@ Analysis
                   axis.text.x=element_text(angle=45, vjust=1.1,hjust=1.1,size=16)) +
                 theme(axis.title.y=element_text(face="bold",size=20,vjust=1),
                   axis.text.y=element_text(angle=0, vjust=0.5, size=16))
- ```
+```
 
 * Plot Mist Net Captures by area
 
@@ -100,6 +124,40 @@ Analysis
                   axis.text.x=element_text(angle=45, vjust=1.1,hjust=1.1,size=16)) +
                 theme(axis.title.y=element_text(face="bold",size=20,vjust=1),
                   axis.text.y=element_text(angle=0, vjust=0.5, size=16))
- ```
+```
 
+```{r plotObs, include=FALSE, echo=FALSE, cache=FALSE} 
 
+#plot areaObs
+  win.graph(11, 8.5) 
+  a<-areaObs[areaObs$Area!='Seno Yendegaia',] #eliminate Yendegaia
+  a<-a[!is.na(a$Abbr),]  #keep only the count and mist species.
+  ggplot(a, aes(x=Abbr, y=maxRelAbund)) + 
+    geom_bar(position=position_dodge(), stat="identity") +
+                facet_grid(Area~.) +
+                xlab("Bird Species") + 
+                ylab('Maximum Estimated Relative Abundance') +
+                scale_y_continuous(breaks=seq(1, 3, 1)) +
+                theme(axis.title.x=element_text(face="bold",size=20,vjust=-.5),
+                  axis.text.x=element_text(angle=45, vjust=1.1,hjust=1.1,size=16)) +
+                theme(axis.title.y=element_text(face="bold",size=20,vjust=1),
+                  axis.text.y=element_text(angle=0, vjust=0.5, size=16))
+```
+
+```{r plotPlants, include=FALSE, echo=FALSE, cache=FALSE} 
+#plot areaPlants
+  win.graph(11, 8.5) 
+  ggplot(areaPlants, aes(x=Abbr, y=Mean)) + 
+    geom_bar(position=position_dodge(), stat="identity") +
+    geom_errorbar(aes(ymin=Mean-StdErr, ymax=Mean+StdErr),
+                  width=.2,                    # Width of the error bars
+                position=position_dodge(.9))+
+                facet_grid(Area~.) +
+                xlab("Plant Species") + 
+                ylab(paste('Presence Proportion (',expression("\261"),' 1 se)',sep='')) +
+                scale_y_continuous(limits=c(0,1.1)) +
+                theme(axis.title.x=element_text(face="bold",size=20,vjust=-.5),
+                  axis.text.x=element_text(angle=45, vjust=1.1,hjust=1.1,size=16)) +
+                theme(axis.title.y=element_text(face="bold",size=20,vjust=1),
+                  axis.text.y=element_text(angle=0, vjust=0.5, size=16))
+```
